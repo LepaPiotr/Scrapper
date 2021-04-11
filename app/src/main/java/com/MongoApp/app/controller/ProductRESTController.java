@@ -27,9 +27,14 @@ public class ProductRESTController {
         return repository.findByNameLikeIgnoreCase(name);
     }
 
+    @GetMapping("/nameTop/{name}?{shop}")
+    public Product findByNameTop(@PathVariable("name") String name, @PathVariable("name") String shop){
+        return repository.findTop1ByNameAndShopIgnoreCaseOrderByDateOfAddDesc(name, shop);
+    }
+
     @GetMapping("/man/{manufacturer}")
     public List<Product> findByManufacturer(@PathVariable("manufacturer") String manufacturer){
-        return repository.findByManufacturerLikeIgnoreCase(manufacturer);
+        return repository.findByShopLikeIgnoreCase(manufacturer);
     }
 
     @GetMapping()
@@ -41,15 +46,14 @@ public class ProductRESTController {
     public void seleniumFind(@PathVariable("name") String name) throws InterruptedException {
        scrapperService.scrapeXKom(name);
        scrapperService.scrapeMorele(name);
-       scrapperService.scrapeMediaExpert(name);
-       scrapperService.scrapeMediaMarkt(name);
-       scrapperService.scrapeEuro(name);
+       //scrapperService.scrapeMediaExpert(name);
+       //scrapperService.scrapeEuro(name);
 
 
     }
 
     @PostMapping("/addCon")
-    public void  createConstraint(@RequestBody Product product) {
+    public void  createConstraint() {
         productService.doSomeActions();
     }
 

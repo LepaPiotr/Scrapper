@@ -10,7 +10,8 @@ import java.util.List;
 public interface ProductRepository extends MongoRepository<Product, String>  {
 
     public List<Product> findByNameLikeIgnoreCase(String Name);
-    public List<Product> findByManufacturerLikeIgnoreCase(String lastName);
+    public List<Product> findByShopLikeIgnoreCase(String shop);
+    public Product findTop1ByNameAndShopIgnoreCaseOrderByDateOfAddDesc(String Name, String Shop);
     public Product save (Product product);
     public Product deleteById (int prodId);
 

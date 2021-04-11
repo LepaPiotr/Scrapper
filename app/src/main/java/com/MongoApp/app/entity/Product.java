@@ -2,26 +2,26 @@ package com.MongoApp.app.entity;
 
 import org.springframework.data.annotation.Id;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
 public class Product {
     @Id
     private String id;
-
     private String name;
-    private String manufacturer;
-    private Date dateOdAdd;
-    private float price;
+    private String shop;
+    private Date dateOfAdd;
+    private BigDecimal price;
 
     public Product() {
     }
 
-    public Product(String name, String manufacturer, Date dateOdAdd, float price) {
+    public Product(String name, String shop, Date dateOfAdd, BigDecimal price) {
         this.name = name;
-        this.manufacturer = manufacturer;
-        this.dateOdAdd = dateOdAdd;
+        this.dateOfAdd = dateOfAdd;
         this.price = price;
+        this.shop = shop;
     }
 
 
@@ -31,13 +31,23 @@ public class Product {
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
         return id.equals(product.id) &&
-                Objects.equals(name, product.name) &&
-                Objects.equals(manufacturer, product.manufacturer);
+                name.equals(product.name) &&
+                shop.equals(product.shop) &&
+                dateOfAdd.equals(product.dateOfAdd) &&
+                price.equals(product.price);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public String getShop() {
+        return shop;
+    }
+
+    public void setShop(String shop) {
+        this.shop = shop;
     }
 
     public String getId() {
@@ -56,29 +66,20 @@ public class Product {
         this.name = name;
     }
 
-    public String getManufacturer() {
-        return manufacturer;
+
+    public Date getDateOfAdd() {
+        return dateOfAdd;
     }
 
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
+    public void setDateOfAdd(Date dateOfAdd) {
+        this.dateOfAdd = dateOfAdd;
     }
 
-    public Date getDateOdAdd() {
-        return dateOdAdd;
-    }
-
-    public void setDateOdAdd(Date dateOdAdd) {
-        this.dateOdAdd = dateOdAdd;
-    }
-
-    public float getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
-
-
 }
