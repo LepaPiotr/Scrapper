@@ -21,7 +21,7 @@ public class ProductService {
 //        productRepository.save(new Product("S21", "Samsung", new Date() , 5699.99f));
         return null;
     }
-
+//dodaje produkt weryfikująć czy znajduje się już w bazie jeśli tak i cena nie została zmieniona jest aktualizowana data, jeśli nie dodaje nowy rekord do bazy
     public void addWitchCheck(Product product){
         Product lastProd = productRepository.findTop1ByNameAndShopIgnoreCaseOrderByDateOfAddDesc(product.getName(), product.getShop());
         Calendar calLastProd = new GregorianCalendar();

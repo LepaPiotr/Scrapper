@@ -36,7 +36,7 @@ public class ScrapperService {
     @Autowired
     private ProductService productService;
 
-    public void addItem(Product product){
+    public void addItem(Product product) {
         productService.addWitchCheck(product);
     }
 
@@ -49,10 +49,29 @@ public class ScrapperService {
                 };
         new WebDriverWait(driver, 30).until(pageLoadCondition);
     }
+
+    public void scrapeAll(String message) throws InterruptedException {
+        try {
+            scrapeXKom(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+        scrapeMorele(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+        scrapeEuro(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void scrapeXKom(final String value) {
         URL = "https://www.x-kom.pl";
         driver.get(URL);
-    //    System.out.println(URL + value);
+        //    System.out.println(URL + value);
         waitForLoad(driver);
         try {
             final WebElement placeToWrite = driver.findElement(By.xpath("//input[@class='sc-1hdf4hr-0 frAjNp']"));
@@ -62,6 +81,7 @@ public class ScrapperService {
             List<WebElement> prices = new ArrayList<>();
             List<WebElement> names = new ArrayList<>();
             boolean loop = true;
+            // pętla, która przeszukuje strony z wynikami
             while (loop) {
                 try {
                     driver.get(driver.getCurrentUrl());
@@ -69,12 +89,13 @@ public class ScrapperService {
                     WebElement products = driver.findElement(By.xpath("//div[@id='listing-container']"));
                     prices = (products.findElements(By.xpath("//span[@class='sc-6n68ef-0 sc-6n68ef-3 hNZEsQ']")));
                     names = (products.findElements(By.xpath("//a[@class='sc-1h16fat-0 irSQpN']")));
+                    //pętla dodająca dane do bazy dla konkretnej strony
                     for (int i = 0; i < prices.size(); i++) {
-          //              System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
+                                      System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
                         BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
-                                .substring(0, prices.get(i).getText().length() -2)
+                                .substring(0, prices.get(i).getText().length() - 2)
                                 .replace(" ", "")
-                                .replace(",",".")));
+                                .replace(",", ".")));
 
                         Product productToAdd = new Product(names.get(i).getText(), "X-kom", new Date(),
                                 priceBD.setScale(2, RoundingMode.HALF_UP));
@@ -84,15 +105,15 @@ public class ScrapperService {
                             "//a[@class='sc-11oikyw-3 fcPVMJ sc-1h16fat-0 irSQpN']"));
                     nextPage.click();
                 } catch (Exception e) {
-         //           System.out.println("skończyły się strony");
+                    System.out.println("skończyły się strony X-kom");
                     loop = false;
                 }
             }
-      //      System.out.println(names.size());
-       //     System.out.println(prices.size());
+            //      System.out.println(names.size());
+            //     System.out.println(prices.size());
             counter = 0;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Błąd X_KOM");
         }
     }
 
@@ -101,10 +122,11 @@ public class ScrapperService {
         driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         driver.get(URL);
-     //   System.out.println(URL + value);
+        //   System.out.println(URL + value);
         waitForLoad(driver);
         try {
             try {
+                //kliknięcie przycisku akceptującego ciasteczka, który przeszkadza przy dalszych kliknięciach
                 final WebElement cookie = driver.findElement(By.xpath("//button[@class='btn btn-secondary btn-secondary-outline btn-md close-cookie-box']"));
                 cookie.click();
             } catch (Exception e) {
@@ -120,27 +142,28 @@ public class ScrapperService {
             boolean loop = true;
             String location = "";
             boolean isLocationChange = true;
+            // pętla, która przeszukuje strony z wynikami, kliknięcie przycisku zmiany strony przed przekierowaniem wywołuje akcję
+            // odświerzenia, selenium uznaje, że przekierowanie już wystapiło mimo że tak nie było, stąd musi być sprawdzany warunek
+            // czy ścieżka została zmieniona
             while (loop) {
-         //       System.out.println("Wykonuje się w pętli i powinienem wymusić kolejną stronę");
-                if(location.equals(driver.getCurrentUrl())){
+                if (location.equals(driver.getCurrentUrl())) {
                     isLocationChange = false;
-                }
-                else {
+                } else {
                     isLocationChange = true;
                     location = driver.getCurrentUrl();
                 }
-                if(isLocationChange) {
+                if (isLocationChange) {
                     try {
                         driver.get(driver.getCurrentUrl());
                         WebElement products = driver.findElement(By.xpath("//div[@class='category-list']"));
                         prices = products.findElements(By.xpath("//div[@class='price-new']"));
                         names = products.findElements(By.xpath("//a[@class='productLink']"));
                         for (int i = 0; i < prices.size(); i++) {
-            //                System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
+                                            System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
                             BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
-                                    .substring(0, prices.get(i).getText().length() -2)
+                                    .substring(0, prices.get(i).getText().length() - 2)
                                     .replace(" ", "")
-                                    .replace(",",".")));
+                                    .replace(",", ".")));
                             Product productToAdd = new Product(names.get(i).getText(), "Morele", new Date(),
                                     priceBD.setScale(2, RoundingMode.HALF_UP));
                             addItem(productToAdd);
@@ -150,78 +173,72 @@ public class ScrapperService {
                         nextPage.click();
                         isLocationChange = false;
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        System.out.println("Skończyły się strony");
                         loop = false;
                     }
                 }
             }
         } catch (Exception e) {
 
-            e.printStackTrace();
+            System.out.println("Błąd Morele");
         }
     }
 
-    public void scrapeMediaExpert(final String value) throws InterruptedException {
-        URL = "https://www.mediaexpert.pl";
-        driver.get(URL);
-        System.out.println(URL + value);
-        waitForLoad(driver);
-        try {
-            final WebElement placeToWrite = driver.findElement(By.xpath("//input[@name='search']"));
-            placeToWrite.sendKeys(value);
-            final WebElement search = driver.findElement(By.xpath("//div[@class='c-search_submit']"));
-            search.click();
-            driver.get(driver.getCurrentUrl());
-            waitForLoad(driver);
-            final WebElement products = driver.findElement(By.xpath("//div[@class='c-grid is-equal is-offers is-lazyLoadContainer is-loaded']"));
-            List<WebElement> prices = products.findElements(By.xpath("//div[@class='c-offerBox_price is-normalPrice is-promoPrice']\n" +
-                    "//span[@class='a-price_price']"));
-            prices.addAll(products.findElements(By.xpath("//div[@class='c-offerBox_price is-normalPrice ']\n" +
-                    "                //span[@class='a-price_price']")));
-            final List<WebElement> names = products.findElements(By.xpath("//h2[@class='c-offerBox_data ']\n" +
-                    "//a[@class='a-typo is-secondary']"));
-            System.out.println(names.size());
-            System.out.println(prices.size());
-            counter = 0;
-            for (int i = 0; i < prices.size(); i++) {
-                System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
-            }
-        } catch (Exception e) {
-            counter++;
-            if (counter < 3) {
-                scrapeMediaExpert(value);
-            }
-            e.printStackTrace();
-        }
-    }
-//    public void scrapeMediaMarkt(final String value) throws InterruptedException {
-//        URL = "https://mediamarkt.pl/";
+//    public void scrapeMediaExpert(final String value) throws InterruptedException {
+//        URL = "https://www.mediaexpert.pl";
 //        driver.get(URL);
 //        System.out.println(URL + value);
 //        waitForLoad(driver);
-//        WebDriverWait wait = new WebDriverWait(driver, 30);
-//        try{
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='m-search_input js-search-input js-search_input']")));driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-//        final WebElement placeToWrite = driver.findElement(By.xpath("//input[@class='m-search_input js-search-input js-search_input']"));
-//        placeToWrite.sendKeys(value);
-//        final WebElement search = driver.findElement(By.xpath("//button[@id='js-triggerSearch']"));
-//        search.click();
-//        driver.get(driver.getCurrentUrl());
-//        waitForLoad(driver);
-//        final WebElement products = driver.findElement(By.xpath("//div[@class='b-row clearfix2 b-listing_classic js-eqContainer js-offerBox js-equalHRow']"));
-//        final List<WebElement> prices = products.findElements(By.xpath("//div[@itemprop='price']"));
-//        final List<WebElement> names = products.findElements(By.xpath("//a[@class='b-ofr_headDataTitle']"));
-//        System.out.println(names.size());
-//        System.out.println(prices.size());
-//            counter = 0;
-//        for (int i = 0; i < prices.size(); i++) {
-//            System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
-//        }
+//        try {
+//            final WebElement placeToWrite = driver.findElement(By.xpath("//input[@name='search']"));
+//            placeToWrite.sendKeys(value);
+//            final WebElement search = driver.findElement(By.xpath("//div[@class='c-search_submit']"));
+//            search.click();
+//            boolean loop = true;
+//            WebElement price;
+//            WebElement name;
+//
+//            while (loop) {
+//
+//                    try {
+//                        driver.get(driver.getCurrentUrl());
+//                        WebElement products = driver.findElement(By.xpath("//div[@class='c-grid is-equal is-offers is-lazyLoadContainer is-loaded']"));
+//                        List <WebElement> listOfProducts = products.findElements(By.xpath("//div[@class ='c-grid_col is-grid-col-1']"));
+//                        int salePriceIndex = 0;
+//                        int normalPriceIndex = 0;
+//
+//                        for(int i = 0; i < listOfProducts.size(); i++){
+//                            try{
+//                                //próbuje pobrać cene bez promocji
+//                                price = listOfProducts.get(i).findElements(By.xpath("//div[@class='c-offerBox_price is-normalPrice is-promoPrice']")).get(normalPriceIndex);
+//                                normalPriceIndex ++;
+//                            }
+//                            catch (Exception e){
+//                                //jeśli nie ma ceny bez promocji pobiera cene promocyjną
+//                                price = (listOfProducts.get(i).findElements(By.xpath("//div[@class='c-offerBox_price is-normalPrice is-promoPrice']\n" +
+//                                        "//span[@class='a-price_price']"))).get(salePriceIndex);
+//                                salePriceIndex ++;
+//                            }
+//                            name = listOfProducts.get(i).findElements(By.xpath("//h2[@class='c-offerBox_data ']\n" +
+//                                    "//a[@class='a-typo is-secondary']")).get(i);
+//
+//                            System.out.println(name.getText() + " " + price.getText().substring(0,price.getText().length() - 2)
+//                                    .replace(" ", "").replace("\n",""));
+//                            BigDecimal priceBD = new BigDecimal(Float.parseFloat(price.getText().substring(0,price.getText().length() - 2)
+//                                    .replace(" ", "").replace("\n","")));
+//                            Product productToAdd = new Product(name.getText(), "MediaExpert", new Date(),
+//                                    priceBD.setScale(2, RoundingMode.HALF_UP));
+//                            addItem(productToAdd);
+//                        }
+//                        WebElement nextPage = driver.findElement(By.xpath("//div[@class='c-toolbar ']\n" +
+//                                "//a[@class='is-nextLink']"));
+//                        nextPage.click();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        loop = false;
+//                    }
+//                }
 //        } catch (Exception e) {
-//            counter ++;
-//            if(counter < 3) {
-//                scrapeMediaMarkt(value);
-//            }
 //            e.printStackTrace();
 //        }
 //    }
@@ -238,23 +255,72 @@ public class ScrapperService {
             search.click();
             driver.get(driver.getCurrentUrl());
             waitForLoad(driver);
-            final WebElement products = driver.findElement(By.xpath("//div[@id='products']"));
-            final List<WebElement> prices = products.findElements(By.xpath("//div[@class='price-normal selenium-price-normal']"));
-            final List<WebElement> names = products.findElements(By.xpath("//a[@class='js-save-keyword']"));
-            System.out.println(names.size());
-            System.out.println(prices.size());
-            counter = 0;
-            for (int i = 1; i < prices.size(); i += 2) {
-                System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
+
+            List<WebElement> prices = new ArrayList<>();
+            List<WebElement> names = new ArrayList<>();
+            boolean loop = true;
+            String location = "";
+            boolean isLocationChange = true;
+            // pętla, która przeszukuje strony z wynikami
+            while (loop) {
+                if (location.equals(driver.getCurrentUrl())) {
+                    isLocationChange = false;
+                } else {
+                    isLocationChange = true;
+                    location = driver.getCurrentUrl();
+                }
+                if (isLocationChange) {
+                    try {
+                        System.out.println(driver.getCurrentUrl());
+                        driver.get(driver.getCurrentUrl());
+                        waitForLoad(driver);
+                        WebElement products = driver.findElement(By.xpath("//div[@id='products']"));
+                        prices = (products.findElements(By.xpath("//div[@class='price-normal selenium-price-normal']")));
+                        names = (products.findElements(By.xpath("//a[@class='js-save-keyword']")));
+                        //pętla dodająca dane do bazy dla konkretnej strony
+                        for (int i = 1; i < names.size(); i += 2) {
+                        System.out.println("jestem w pętli");
+
+                        System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
+
+                        BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
+                                .substring(0, prices.get(i).getText().length() - 2)
+                                .replace(" ", "")
+                                .replace(",", ".")));
+
+                        Product productToAdd = new Product(names.get(i).getText(), "Euro", new Date(),
+                                priceBD.setScale(2, RoundingMode.HALF_UP));
+                        addItem(productToAdd);
+                        }
+                        WebElement nextPage = driver.findElement(By.xpath("//a[@class = 'paging-next selenium-WC-paging-next-button']"));
+                        nextPage.click();
+                    } catch (Exception e) {
+                        System.out.println("Skończyły się strony");
+                        loop = false;
+                    }
+                }
+
+//            final WebElement products = driver.findElement(By.xpath("//div[@id='products']"));
+//            final List<WebElement> prices = products.findElements(By.xpath("//div[@class='price-normal selenium-price-normal']"));
+//            final List<WebElement> names = products.findElements(By.xpath("//a[@class='js-save-keyword']"));
+//            System.out.println(names.size());
+//            System.out.println(prices.size());
+//            counter = 0;
+//            for (int i = 1; i < prices.size(); i += 2) {
+//                System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
+//            }
+//        } catch (Exception e) {
+//            counter++;
+//            if (counter < 3) {
+//                scrapeEuro(value);
+//            }
+//            e.printStackTrace();
+//        }
             }
+
+
         } catch (Exception e) {
-            counter++;
-            if (counter < 3) {
-                scrapeEuro(value);
-            }
-            e.printStackTrace();
+            System.out.println("Błąd Euro");
         }
     }
-
-
 }

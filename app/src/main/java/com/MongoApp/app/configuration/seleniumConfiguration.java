@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class seleniumConfiguration {
@@ -23,13 +24,16 @@ public class seleniumConfiguration {
         chromeOptions.addArguments("--proxy-server='direct://'");
         chromeOptions.addArguments("--start-maximized");
         chromeOptions.addArguments("--proxy-bypass-list=*");
-      //  chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--disable-gpu");
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--ignore-certificate-errors");
+        ChromeDriver chromeDriver = new ChromeDriver(chromeOptions);
 
-        return new ChromeDriver(chromeOptions);
+        chromeDriver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+
+        return chromeDriver;
     }
 
 }

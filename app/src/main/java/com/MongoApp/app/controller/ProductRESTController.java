@@ -46,8 +46,7 @@ public class ProductRESTController {
     public void seleniumFind(@PathVariable("name") String name) throws InterruptedException {
        scrapperService.scrapeXKom(name);
        scrapperService.scrapeMorele(name);
-       //scrapperService.scrapeMediaExpert(name);
-       //scrapperService.scrapeEuro(name);
+       scrapperService.scrapeEuro(name);
 
 
     }
