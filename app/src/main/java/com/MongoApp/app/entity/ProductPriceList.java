@@ -6,22 +6,24 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
-public class Product {
+public class ProductPriceList {
     @Id
     private String id;
+    private String productId;
     private String name;
     private String shop;
-    private Date dateOfActualization;
-    private BigDecimal lastKnowPrice;
+    private Date dateOfAdd;
+    private BigDecimal price;
 
-    public Product() {
+    public ProductPriceList() {
     }
 
-    public Product(String name, String shop, Date dateOfActualization, BigDecimal lastKnowPrice) {
+    public ProductPriceList(String name, String shop, Date dateOfAdd, BigDecimal price, String productId) {
         this.name = name;
-        this.dateOfActualization = dateOfActualization;
-        this.lastKnowPrice = lastKnowPrice;
+        this.dateOfAdd = dateOfAdd;
+        this.price = price;
         this.shop = shop;
+        this.productId = productId;
     }
 
 
@@ -29,12 +31,12 @@ public class Product {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Product productPriceList = (Product) o;
+        ProductPriceList productPriceList = (ProductPriceList) o;
         return id.equals(productPriceList.id) &&
                 name.equals(productPriceList.name) &&
                 shop.equals(productPriceList.shop) &&
-                dateOfActualization.equals(productPriceList.dateOfActualization) &&
-                lastKnowPrice.equals(productPriceList.lastKnowPrice);
+                dateOfAdd.equals(productPriceList.dateOfAdd) &&
+                price.equals(productPriceList.price);
     }
 
     @Override
@@ -67,19 +69,27 @@ public class Product {
     }
 
 
-    public Date getDateOfActualization() {
-        return dateOfActualization;
+    public Date getDateOfAdd() {
+        return dateOfAdd;
     }
 
-    public void setDateOfActualization(Date dateOfAdd) {
-        this.dateOfActualization = dateOfAdd;
+    public void setDateOfAdd(Date dateOfAdd) {
+        this.dateOfAdd = dateOfAdd;
     }
 
-    public BigDecimal getLastKnowPrice() {
-        return lastKnowPrice;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setLastKnowPrice(BigDecimal price) {
-        this.lastKnowPrice = price;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
     }
 }

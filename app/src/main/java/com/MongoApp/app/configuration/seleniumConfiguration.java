@@ -24,7 +24,7 @@ public class seleniumConfiguration {
         chromeOptions.addArguments("--proxy-server='direct://'");
         chromeOptions.addArguments("--start-maximized");
         chromeOptions.addArguments("--proxy-bypass-list=*");
-        chromeOptions.addArguments("--headless");
+       // chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--disable-gpu");
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--no-sandbox");

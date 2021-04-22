@@ -1,7 +1,7 @@
 package com.MongoApp.app.controller;
 
-import com.MongoApp.app.entity.Product;
-import com.MongoApp.app.mongoRepos.ProductRepository;
+import com.MongoApp.app.entity.ProductPriceList;
+import com.MongoApp.app.mongoRepos.ProductPriceListRepository;
 import com.MongoApp.app.service.ProductService;
 import com.MongoApp.app.service.ScrapperService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +11,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/product")
-public class ProductRESTController {
+public class ProductPriceListRESTController {
 
     @Autowired
-    ProductRepository repository;
+    ProductPriceListRepository repository;
 
     @Autowired
     ProductService productService;
@@ -23,22 +23,22 @@ public class ProductRESTController {
     ScrapperService scrapperService;
 
     @GetMapping("/name/{name}")
-    public List<Product> findByName(@PathVariable("name") String name){
+    public List<ProductPriceList> findByName(@PathVariable("name") String name){
         return repository.findByNameLikeIgnoreCase(name);
     }
 
     @GetMapping("/nameTop/{name}?{shop}")
-    public Product findByNameTop(@PathVariable("name") String name, @PathVariable("name") String shop){
+    public ProductPriceList findByNameTop(@PathVariable("name") String name, @PathVariable("name") String shop){
         return repository.findTop1ByNameAndShopIgnoreCaseOrderByDateOfAddDesc(name, shop);
     }
 
     @GetMapping("/man/{manufacturer}")
-    public List<Product> findByManufacturer(@PathVariable("manufacturer") String manufacturer){
+    public List<ProductPriceList> findByManufacturer(@PathVariable("manufacturer") String manufacturer){
         return repository.findByShopLikeIgnoreCase(manufacturer);
     }
 
     @GetMapping()
-    public List<Product> findAll(){
+    public List<ProductPriceList> findAll(){
         return repository.findAll();
     }
 
@@ -47,23 +47,16 @@ public class ProductRESTController {
        scrapperService.scrapeXKom(name);
        scrapperService.scrapeMorele(name);
        scrapperService.scrapeEuro(name);
-
-
-    }
-
-    @PostMapping("/addCon")
-    public void  createConstraint() {
-        productService.doSomeActions();
     }
 
     @PostMapping
-    public Product createCustomer(@RequestBody Product product) {
-        return repository.save(product);
+    public ProductPriceList createCustomer(@RequestBody ProductPriceList productPriceList) {
+        return repository.save(productPriceList);
     }
 
     @PutMapping
-    public Product updateCustomer(@RequestBody Product product) {
-        return repository.save(product);
+    public ProductPriceList updateCustomer(@RequestBody ProductPriceList productPriceList) {
+        return repository.save(productPriceList);
     }
 
     @DeleteMapping("/{id}")

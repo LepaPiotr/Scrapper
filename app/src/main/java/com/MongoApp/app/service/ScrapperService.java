@@ -1,6 +1,8 @@
 package com.MongoApp.app.service;
 
 import com.MongoApp.app.entity.Product;
+import com.MongoApp.app.entity.ProductPriceList;
+import com.MongoApp.app.mongoRepos.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -8,7 +10,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
-
 @Service
 @AllArgsConstructor
 public class ScrapperService {
@@ -31,13 +30,24 @@ public class ScrapperService {
 
     private ChromeDriver driver;
 
-    private static int counter = 0;
 
     @Autowired
     private ProductService productService;
 
-    public void addItem(Product product) {
-        productService.addWitchCheck(product);
+    @Autowired
+    private ProductRepository productRepository;
+
+    public void addItem(String name, String shop, Date date, BigDecimal price) {
+        String prodId;
+        Product prod = productRepository.findByNameIgnoreCaseAndShop(name, shop);
+        if(prod != null)
+            prodId = prod.getId();
+        else{
+            prod = productRepository.save(new Product(name, shop,date, price));
+        }
+        ProductPriceList productPriceList = new ProductPriceList(name, shop, date, price, prod.getId());
+
+        productService.addWitchCheck(productPriceList, prod);
     }
 
     public void waitForLoad(WebDriver driver) {
@@ -91,27 +101,27 @@ public class ScrapperService {
                     names = (products.findElements(By.xpath("//a[@class='sc-1h16fat-0 irSQpN']")));
                     //pętla dodająca dane do bazy dla konkretnej strony
                     for (int i = 0; i < prices.size(); i++) {
+                        System.out.println(prices.size() + "rozmiar");
                                       System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
                         BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
                                 .substring(0, prices.get(i).getText().length() - 2)
                                 .replace(" ", "")
                                 .replace(",", ".")));
-
-                        Product productToAdd = new Product(names.get(i).getText(), "X-kom", new Date(),
-                                priceBD.setScale(2, RoundingMode.HALF_UP));
-                        addItem(productToAdd);
+                        System.out.println("przed dodawaniem");
+                        addItem(names.get(i).getText(), "X-kom", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP));
+                        System.out.println("po dodawaniu");
                     }
                     WebElement nextPage = driver.findElement(By.xpath("//div[@class='sc-11oikyw-0 jeEhfJ']\n" +
                             "//a[@class='sc-11oikyw-3 fcPVMJ sc-1h16fat-0 irSQpN']"));
                     nextPage.click();
                 } catch (Exception e) {
+               //     e.printStackTrace();
                     System.out.println("skończyły się strony X-kom");
                     loop = false;
                 }
             }
             //      System.out.println(names.size());
             //     System.out.println(prices.size());
-            counter = 0;
         } catch (Exception e) {
             System.out.println("Błąd X_KOM");
         }
@@ -132,7 +142,6 @@ public class ScrapperService {
             } catch (Exception e) {
                 System.out.println("nie ma przycisku casteczek");
             }
-
             final WebElement placeToWrite = driver.findElement(By.xpath("//input[@name='search']"));
             placeToWrite.sendKeys(value);
             final WebElement search = driver.findElement(By.xpath("//button[@class='btn btn-primary h-quick-search-submit']"));
@@ -164,9 +173,8 @@ public class ScrapperService {
                                     .substring(0, prices.get(i).getText().length() - 2)
                                     .replace(" ", "")
                                     .replace(",", ".")));
-                            Product productToAdd = new Product(names.get(i).getText(), "Morele", new Date(),
-                                    priceBD.setScale(2, RoundingMode.HALF_UP));
-                            addItem(productToAdd);
+
+                            addItem(names.get(i).getText(), "Morele", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP));
                         }
                         WebElement nextPage = driver.findElement(By.xpath("//li[@class='pagination-lg next']\n" +
                                 "//a[@class='pagination-btn']"));
@@ -255,7 +263,6 @@ public class ScrapperService {
             search.click();
             driver.get(driver.getCurrentUrl());
             waitForLoad(driver);
-
             List<WebElement> prices = new ArrayList<>();
             List<WebElement> names = new ArrayList<>();
             boolean loop = true;
@@ -288,9 +295,7 @@ public class ScrapperService {
                                 .replace(" ", "")
                                 .replace(",", ".")));
 
-                        Product productToAdd = new Product(names.get(i).getText(), "Euro", new Date(),
-                                priceBD.setScale(2, RoundingMode.HALF_UP));
-                        addItem(productToAdd);
+                            addItem(names.get(i).getText(), "Euro", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP));
                         }
                         WebElement nextPage = driver.findElement(By.xpath("//a[@class = 'paging-next selenium-WC-paging-next-button']"));
                         nextPage.click();
@@ -299,25 +304,7 @@ public class ScrapperService {
                         loop = false;
                     }
                 }
-
-//            final WebElement products = driver.findElement(By.xpath("//div[@id='products']"));
-//            final List<WebElement> prices = products.findElements(By.xpath("//div[@class='price-normal selenium-price-normal']"));
-//            final List<WebElement> names = products.findElements(By.xpath("//a[@class='js-save-keyword']"));
-//            System.out.println(names.size());
-//            System.out.println(prices.size());
-//            counter = 0;
-//            for (int i = 1; i < prices.size(); i += 2) {
-//                System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
-//            }
-//        } catch (Exception e) {
-//            counter++;
-//            if (counter < 3) {
-//                scrapeEuro(value);
-//            }
-//            e.printStackTrace();
-//        }
             }
-
 
         } catch (Exception e) {
             System.out.println("Błąd Euro");
