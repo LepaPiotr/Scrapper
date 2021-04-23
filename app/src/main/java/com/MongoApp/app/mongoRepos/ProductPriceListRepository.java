@@ -12,8 +12,10 @@ public interface ProductPriceListRepository extends MongoRepository<ProductPrice
     public List<ProductPriceList> findByNameLikeIgnoreCase(String Name);
     public List<ProductPriceList> findByShopLikeIgnoreCase(String shop);
     public ProductPriceList findTop1ByNameAndShopIgnoreCaseOrderByDateOfAddDesc(String Name, String Shop);
+    public List<ProductPriceList> findByProductId(String id);
     public ProductPriceList save (ProductPriceList productPriceList);
-    public ProductPriceList deleteById (int prodId);
+
+    //public ProductPriceList deleteById (int prodId);
 
 
 }

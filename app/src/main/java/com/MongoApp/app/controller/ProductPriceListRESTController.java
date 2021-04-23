@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/productPriceList")
+@CrossOrigin
 public class ProductPriceListRESTController {
 
     @Autowired
@@ -25,6 +26,11 @@ public class ProductPriceListRESTController {
     @GetMapping("/name/{name}")
     public List<ProductPriceList> findByName(@PathVariable("name") String name){
         return repository.findByNameLikeIgnoreCase(name);
+    }
+
+    @GetMapping("/id/{id}")
+    public List<ProductPriceList> findById(@PathVariable("id") String id){
+        return repository.findByProductId(id);
     }
 
     @GetMapping("/nameTop/{name}?{shop}")
