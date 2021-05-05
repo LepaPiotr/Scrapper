@@ -25,10 +25,15 @@ public class ProductRESTController {
         return repository.findAll();
     }
 
-
-    @DeleteMapping("/{id}")
-    public void deleteCustomer(@PathVariable("id") String prodId) {
-        repository.deleteById(prodId);
+    @GetMapping("/name/{name}")
+    public List<Product> findByName(@PathVariable("name") String name){
+        return repository.findByNameLikeIgnoreCase(name);
     }
+
+//
+//    @DeleteMapping("/{id}")
+//    public void deleteCustomer(@PathVariable("id") String prodId) {
+//        repository.deleteById(prodId);
+//    }
 
 }

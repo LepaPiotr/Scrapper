@@ -15,6 +15,7 @@ public interface ProductRepository extends MongoRepository<Product, String>  {
     public Product findTop1ByNameAndShopIgnoreCaseOrderByDateOfActualizationDesc(String Name, String Shop);
     public Product save (Product productPriceList);
     public Product deleteById (int prodId);
+    public List<Product> findByNameLikeIgnoreCase(String Name);
 
 
 }
