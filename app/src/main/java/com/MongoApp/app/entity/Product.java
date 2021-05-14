@@ -13,18 +13,16 @@ public class Product {
     private String shop;
     private Date dateOfActualization;
     private BigDecimal lastKnowPrice;
-    private String imageUrl;
     private String link;
 
     public Product() {
     }
 
-    public Product(String name, String shop, Date dateOfActualization, BigDecimal lastKnowPrice, String imageUrl, String link) {
+    public Product(String name, String shop, Date dateOfActualization, BigDecimal lastKnowPrice, String link) {
         this.name = name;
         this.dateOfActualization = dateOfActualization;
         this.lastKnowPrice = lastKnowPrice;
         this.shop = shop;
-        this.imageUrl = imageUrl;
         this.link = link;
     }
 
@@ -85,14 +83,6 @@ public class Product {
 
     public void setLastKnowPrice(BigDecimal price) {
         this.lastKnowPrice = price;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 
     public String getLink() {
