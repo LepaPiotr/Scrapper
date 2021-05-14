@@ -39,16 +39,15 @@ public class ScrapperService {
     @Autowired
     private SeleniumConfiguration seleniumConfiguration;
 
-    public void addItem(String name, String shop, Date date, BigDecimal price) {
+    public void addItem(String name, String shop, Date date, BigDecimal price, String imageUrl, String link) {
         String prodId;
         Product prod = productRepository.findByNameIgnoreCaseAndShop(name, shop);
         if (prod != null)
             prodId = prod.getId();
         else {
-            prod = productRepository.save(new Product(name, shop, date, price));
+            prod = productRepository.save(new Product(name, shop, date, price, imageUrl, link));
         }
         ProductPriceList productPriceList = new ProductPriceList(name, shop, date, price, prod.getId());
-
         productService.addWitchCheck(productPriceList, prod);
     }
 
@@ -109,6 +108,8 @@ public class ScrapperService {
             search.click();
             List<WebElement> prices = new ArrayList<>();
             List<WebElement> names = new ArrayList<>();
+            List<WebElement> photos = new ArrayList<>();
+            List<WebElement> links = new ArrayList<>();
             boolean loop = true;
             // pętla, która przeszukuje strony z wynikami
             int counter = 1;
@@ -123,6 +124,8 @@ public class ScrapperService {
                     WebElement products = driver.findElement(By.xpath("//div[@id='listing-container']"));
                     prices = (products.findElements(By.xpath("//span[@class='sc-6n68ef-0 sc-6n68ef-3 hNZEsQ']")));
                     names = (products.findElements(By.xpath("//a[@class='sc-1h16fat-0 irSQpN']")));
+                    photos = (products.findElements(By.xpath("//img[@class='sc-1tblmgq-1 iJMrdx']")));
+                    links = (products.findElements(By.xpath("//a[@class='sc-1h16fat-0 sc-1yu46qn-9 elgoMT']")));
                     //pętla dodająca dane do bazy dla konkretnej strony
                     for (int i = 0; i < prices.size(); i++) {
                         System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
@@ -130,7 +133,9 @@ public class ScrapperService {
                                 .substring(0, prices.get(i).getText().length() - 2)
                                 .replace(" ", "")
                                 .replace(",", ".")));
-                        addItem(names.get(i).getText(), "X-kom", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP));
+                        System.out.println(photos.get(1).getAttribute("src"));
+                        addItem(names.get(i).getText(), "X-kom", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP),
+                                photos.get(i).getAttribute("src"), links.get(i).getAttribute("href"));
                     }
                     WebElement nextPage = driver.findElement(By.xpath("//div[@class='sc-11oikyw-0 jeEhfJ']\n" +
                             "//a[@class='sc-11oikyw-3 fcPVMJ sc-1h16fat-0 irSQpN']"));
@@ -174,6 +179,8 @@ public class ScrapperService {
             search.click();
             List<WebElement> prices = new ArrayList<>();
             List<WebElement> names = new ArrayList<>();
+            List<WebElement> photos = new ArrayList<>();
+            List<WebElement> links = new ArrayList<>();
             boolean loop = true;
             String location = "";
             boolean isLocationChange = true;
@@ -205,6 +212,7 @@ public class ScrapperService {
                         WebElement products = driver.findElement(By.xpath("//div[@class='category-list']"));
                         prices = products.findElements(By.xpath("//div[@class='price-new']"));
                         names = products.findElements(By.xpath("//a[@class='productLink']"));
+
                         for (int i = 0; i < prices.size(); i++) {
                             System.out.println(i + ".  " + names.get(i).getText() + " " + prices.get(i).getText());
                             BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
@@ -212,13 +220,16 @@ public class ScrapperService {
                                     .replace(" ", "")
                                     .replace(",", ".")));
 
-                            addItem(names.get(i).getText(), "Morele", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP));
+                            addItem(names.get(i).getText(), "Morele", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP),
+                                    "",
+                                    names.get(i).getAttribute("href"));
                         }
                         WebElement nextPage = driver.findElement(By.xpath("//li[@class='pagination-lg next']\n" +
                                 "//a[@class='pagination-btn']"));
                         nextPage.click();
                         isLocationChange = false;
                     } catch (Exception e) {
+                        e.printStackTrace();
                         System.out.println("Skończyły się strony");
                         loop = false;
                     }
@@ -340,6 +351,9 @@ public class ScrapperService {
                         WebElement products = driver.findElement(By.xpath("//div[@id='products']"));
                         prices = (products.findElements(By.xpath("//div[@class='price-normal selenium-price-normal']")));
                         names = (products.findElements(By.xpath("//a[@class='js-save-keyword']")));
+//                        photos = products.findElements(By.xpath("//a[@class='photo-hover js-save-keyword js-photo-hover']\n" +
+//                                "//img"));
+//                        links = products.findElements(By.xpath("//a[@class='photo-hover js-save-keyword js-photo-hover']"));
                         //pętla dodająca dane do bazy dla konkretnej strony
                         for (int i = 1; i < names.size(); i += 2) {
                             System.out.println("jestem w pętli");
@@ -351,12 +365,15 @@ public class ScrapperService {
                                     .replace(" ", "")
                                     .replace(",", ".")));
 
-                            addItem(names.get(i).getText(), "Euro", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP));
+                            addItem(names.get(i).getText(), "Euro", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP),
+                                   "",
+                                    names.get(i).getAttribute("href"));
                         }
                         WebElement nextPage = driver.findElement(By.xpath("//a[@class = 'paging-next selenium-WC-paging-next-button']"));
                         nextPage.click();
                     } catch (Exception e) {
-                        System.out.println("Skończyły się strony");
+                        e.printStackTrace();
+                        System.out.println("Skończyły się strony Euro");
                         driver.close();
                     }
                 }

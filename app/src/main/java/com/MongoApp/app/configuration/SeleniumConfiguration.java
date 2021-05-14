@@ -31,7 +31,9 @@ public class SeleniumConfiguration {
         chromeOptions.addArguments("--ignore-certificate-errors");
         ChromeDriver chromeDriver = new ChromeDriver(chromeOptions);
 
-        chromeDriver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+        chromeDriver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+        chromeDriver.manage().timeouts().pageLoadTimeout(20, TimeUnit.SECONDS);
+        chromeDriver.manage().timeouts().setScriptTimeout(20, TimeUnit.SECONDS);
 
         return chromeDriver;
     }
