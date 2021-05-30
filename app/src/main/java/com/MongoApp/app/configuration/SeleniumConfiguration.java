@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
-@Service
+@Configuration
 public class SeleniumConfiguration {
 
     @PostConstruct

@@ -2,7 +2,7 @@ package com.MongoApp.app.controller;
 
 import com.MongoApp.app.AppApplication;
 import com.MongoApp.app.entity.Search;
-import com.MongoApp.app.mongoRepos.Searchrepository;
+import com.MongoApp.app.mongoRepos.SearchRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 
 @RestController
-public class FindRESTController {
+public class SearchRESTController {
 
     @Autowired
     RabbitTemplate rabbitTemplate;
 
     @Autowired
-    Searchrepository searchrepository;
+    SearchRepository searchrepository;
 
     @PostMapping("/find/{phrase}")
     public void addToSearchQueue(@PathVariable("phrase") String phrase){

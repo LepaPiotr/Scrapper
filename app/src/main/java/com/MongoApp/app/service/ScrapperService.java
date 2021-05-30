@@ -77,9 +77,9 @@ public class ScrapperService {
         thread2.start();
         thread3.start();
 
-        thread1.join();
-        thread2.join();
-        thread3.join();
+        thread1.join(30000);
+        thread2.join(30000);
+        thread3.join(30000);
     }
 
     public void scrapeXKom(final String value) {

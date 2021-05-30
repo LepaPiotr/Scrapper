@@ -30,10 +30,4 @@ public class ProductRESTController {
         return repository.findByNameLikeIgnoreCase(name);
     }
 
-//
-//    @DeleteMapping("/{id}")
-//    public void deleteCustomer(@PathVariable("id") String prodId) {
-//        repository.deleteById(prodId);
-//    }
-
 }
