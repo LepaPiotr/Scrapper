@@ -69,7 +69,7 @@ public class AppApplication {
         Date date = new Date();
         Calendar cal = new GregorianCalendar();
         cal.setTime(date);
-        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH - 3));
+        cal.add(Calendar.DATE, -3);
         List<Search> searchList = searchrepository.findBySearchDateGreaterThanEqual(cal.getTime());
         HashSet<String> phraseHash = new HashSet<>();
         if (searchList != null && !searchList.isEmpty()) {
@@ -80,7 +80,6 @@ public class AppApplication {
         }
         if (!phraseHash.isEmpty()) {
             for (String phrase : phraseHash) {
-                System.out.println("wysyłam zapytanie o wyszukanie hasła " + phrase);
                 rabbitTemplate.convertAndSend(AppApplication.topicExchangeName, "foo.find", phrase);
             }
         }

@@ -106,13 +106,12 @@ public class ScrapperService {
                 try {
                     counter++;
                     driver.get(driver.getCurrentUrl());
-                    //waitForLoad(driver);
                     WebElement products = driver.findElement(By.xpath("//div[@id='listing-container']"));
                     prices = (products.findElements(By.xpath("//span[@class='sc-6n68ef-0 sc-6n68ef-3 hNZEsQ']")));
                     names = (products.findElements(By.xpath("//a[@class='sc-1h16fat-0 irSQpN']")));
                     //pętla dodająca dane do bazy dla konkretnej strony
                     for (int i = 0; i < prices.size(); i++) {
-                        BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
+                        BigDecimal priceBD = BigDecimal.valueOf(Float.parseFloat(prices.get(i).getText()
                                 .substring(0, prices.get(i).getText().length() - 2)
                                 .replace(" ", "")
                                 .replace(",", ".")));
@@ -123,7 +122,7 @@ public class ScrapperService {
                             "//a[@class='sc-11oikyw-3 fcPVMJ sc-1h16fat-0 irSQpN']"));
                     nextPage.click();
                 } catch (Exception e) {
-                    System.out.println("skończyły się strony X-kom");
+                    System.out.println("end of pages");
                     loop = false;
                 }
             }
