@@ -48,7 +48,7 @@ public class ScrapperService {
             prod = productRepository.save(new Product(name, shop, date, price, link));
         }
         ProductPriceList productPriceList = new ProductPriceList(name, shop, date, price, prod.getId());
-        productService.addWitchCheck(productPriceList, prod);
+        productService.addWitchCheck(productPriceList, prod, date);
     }
 
     public void scrapeAll(String message) throws InterruptedException {
