@@ -57,7 +57,5 @@ public class AddItemTest {
 
         if(productsList.size() != 1 || productsPriceList.size() != 2 )
             assert false;
-
-
     }
 }
