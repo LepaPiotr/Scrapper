@@ -1,13 +1,13 @@
 package com.MongoApp.app;
 
-import com.MongoApp.app.entity.Product;
-import com.MongoApp.app.entity.ProductPriceList;
-import com.MongoApp.app.mongoRepos.ProductPriceListRepository;
-import com.MongoApp.app.mongoRepos.ProductRepository;
-import com.MongoApp.app.service.ScrapperService;
+import com.mongo.app.entity.Product;
+import com.mongo.app.entity.ProductPriceList;
+import com.mongo.app.repository.ProductPriceListRepository;
+import com.mongo.app.repository.ProductRepository;
+import com.mongo.app.service.ScrapperService;
+import lombok.AllArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -19,20 +19,16 @@ import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@AllArgsConstructor
 public class AddItemTest {
 
-    @Autowired
     ScrapperService scrapperService;
-
-    @Autowired
     ProductRepository productRepository;
-
-    @Autowired
     ProductPriceListRepository productPriceListRepository;
 
     @Test
-    public void AddItemTest(){
-        scrapperService.addItem("Test" , "Test", new Date(), BigDecimal.ONE, "");
+    public void addItemTest() {
+        scrapperService.addItem("Test", "Test", new Date(), BigDecimal.ONE, "");
         List<Product> productsList = productRepository.findByNameLikeIgnoreCase("Test");
         List<ProductPriceList> productsPriceList = productPriceListRepository.findByProductId(productsList.get(0).getId());
         assert productsList.size() == 1 || productsPriceList.size() == 1;
@@ -42,20 +38,20 @@ public class AddItemTest {
         cal.setTime(date);
         cal.add(Calendar.DATE, 1);
 
-        scrapperService.addItem("Test" , "Test", cal.getTime(), BigDecimal.ONE, "");
+        scrapperService.addItem("Test", "Test", cal.getTime(), BigDecimal.ONE, "");
 
         productsList = productRepository.findByNameLikeIgnoreCase("Test");
         productsPriceList = productPriceListRepository.findByProductId(productsList.get(0).getId());
 
-        if(productsList.size() != 1 || productsPriceList.size() != 1 || !productsPriceList.get(0).getDateOfAdd().equals(cal.getTime()))
+        if (productsList.size() != 1 || productsPriceList.size() != 1 || !productsPriceList.get(0).getDateOfAdd().equals(cal.getTime()))
             assert false;
 
-        scrapperService.addItem("Test" , "Test", cal.getTime(), BigDecimal.TEN, "");
+        scrapperService.addItem("Test", "Test", cal.getTime(), BigDecimal.TEN, "");
 
         productsList = productRepository.findByNameLikeIgnoreCase("Test");
         productsPriceList = productPriceListRepository.findByProductId(productsList.get(0).getId());
 
-        if(productsList.size() != 1 || productsPriceList.size() != 2 )
+        if (productsList.size() != 1 || productsPriceList.size() != 2)
             assert false;
     }
 }

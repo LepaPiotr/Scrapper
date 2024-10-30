@@ -1,14 +1,12 @@
 package com.MongoApp.app;
 
-import com.MongoApp.app.entity.Product;
-import com.MongoApp.app.entity.ProductPriceList;
-import com.MongoApp.app.mongoRepos.ProductPriceListRepository;
-import com.MongoApp.app.mongoRepos.ProductRepository;
+import com.mongo.app.entity.ProductPriceList;
+import com.mongo.app.repository.ProductPriceListRepository;
+import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
@@ -17,11 +15,10 @@ import java.util.List;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ProductPriceListTest {
+@AllArgsConstructor
+class ProductPriceListTest {
 
-    @Autowired
     ProductPriceListRepository productPriceListRepository;
-
 
     @Test
     @Order(1)
@@ -64,11 +61,10 @@ public class ProductPriceListTest {
     void deleteProductPriceList() {
         List<ProductPriceList> test = productPriceListRepository.findByProductId("newId");
         if (test != null && !test.isEmpty()) {
-            for(ProductPriceList singleProduct: test) {
+            for (ProductPriceList singleProduct : test) {
                 productPriceListRepository.delete(singleProduct);
             }
-        }
-        else{
+        } else {
             assert false;
         }
         List<ProductPriceList> test2 = productPriceListRepository.findByProductId("newId");

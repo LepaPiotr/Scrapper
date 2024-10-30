@@ -1,8 +1,8 @@
-package com.MongoApp.app.controller;
+package com.mongo.app.controller;
 
-import com.MongoApp.app.entity.ProductPriceList;
-import com.MongoApp.app.mongoRepos.ProductPriceListRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mongo.app.entity.ProductPriceList;
+import com.mongo.app.service.ProductPriceListService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,26 +10,26 @@ import java.util.List;
 @RestController
 @RequestMapping("/productPriceList")
 @CrossOrigin
+@AllArgsConstructor
 public class ProductPriceListRESTController {
 
-    @Autowired
-    ProductPriceListRepository repository;
+    ProductPriceListService productPriceListService;
 
 
     @GetMapping("/name/{name}")
     public List<ProductPriceList> findByName(@PathVariable("name") String name){
-        return repository.findByNameLikeIgnoreCase(name);
+        return productPriceListService.findProductPriceByName(name);
     }
 
     @GetMapping("/id/{id}")
     public List<ProductPriceList> findById(@PathVariable("id") String id){
-        return repository.findByProductId(id);
+        return productPriceListService.findByProductId(id);
     }
 
 
     @GetMapping()
     public List<ProductPriceList> findAll(){
-        return repository.findAll();
+        return productPriceListService.findAllProductPrice();
     }
 
 
