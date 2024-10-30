@@ -17,7 +17,7 @@ public class SearchService {
     SearchRepository searchrepository;
 
     public void addToSearchQueue(@PathVariable("phrase") String phrase) {
-        rabbitTemplate.convertAndSend(AppApplication.topicExchangeName, "foo.find", phrase);
+        rabbitTemplate.convertAndSend("spring-boot-exchange", "foo.find", phrase);
         Search search = new Search(phrase, new Date());
         searchrepository.save(search);
     }
