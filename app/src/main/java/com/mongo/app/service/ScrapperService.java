@@ -1,50 +1,37 @@
-package com.MongoApp.app.service;
+package com.mongo.app.service;
 
-import com.MongoApp.app.configuration.SeleniumConfiguration;
-import com.MongoApp.app.entity.Product;
-import com.MongoApp.app.entity.ProductPriceList;
-import com.MongoApp.app.mongoRepos.ProductRepository;
+import com.mongo.app.configuration.SeleniumConfiguration;
+import com.mongo.app.entity.Product;
+import com.mongo.app.entity.ProductPriceList;
+import com.mongo.app.repository.ProductRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ScrapperService {
 
-    private static String URL;
-
-    @Autowired
     private ProductService productService;
-
-    @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
     private SeleniumConfiguration seleniumConfiguration;
+    private static String url;
 
     public void addItem(String name, String shop, Date date, BigDecimal price, String link) {
-        String prodId;
         Product prod = productRepository.findByNameIgnoreCaseAndShop(name, shop);
-        if (prod != null)
-            prodId = prod.getId();
-        else {
+        if (prod == null) {
             prod = productRepository.save(new Product(name, shop, date, price, link));
         }
         ProductPriceList productPriceList = new ProductPriceList(name, shop, date, price, prod.getId());
@@ -56,21 +43,22 @@ public class ScrapperService {
             try {
                 scrapeXKom(message);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         });
         Thread thread2 = new Thread(() -> {
+
             try {
                 scrapeMorele(message);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         });
         Thread thread3 = new Thread(() -> {
             try {
                 scrapeEuro(message);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         });
         thread1.start();
@@ -87,8 +75,8 @@ public class ScrapperService {
         ChromeDriver driver = seleniumConfiguration.driver();
 
         driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
-        URL = "https://www.x-kom.pl";
-        driver.get(URL);
+        url = "https://www.x-kom.pl";
+        driver.get(url);
         try {
             final WebElement placeToWrite = driver.findElement(By.xpath("//input[@class='sc-1hdf4hr-0 frAjNp']"));
             placeToWrite.sendKeys(value);
@@ -122,7 +110,7 @@ public class ScrapperService {
                             "//a[@class='sc-11oikyw-3 fcPVMJ sc-1h16fat-0 irSQpN']"));
                     nextPage.click();
                 } catch (Exception e) {
-                    System.out.println("end of pages");
+                    log.info("end of pages");
                     loop = false;
                 }
             }
@@ -135,15 +123,15 @@ public class ScrapperService {
     public void scrapeMorele(final String value) throws InterruptedException {
         ChromeDriver driver = seleniumConfiguration.driver();
 
-        URL = "https://www.morele.net/";
-        driver.get(URL);
+        url = "https://www.morele.net/";
+        driver.get(url);
         try {
             try {
                 //kliknięcie przycisku akceptującego ciasteczka, który przeszkadza przy dalszych kliknięciach
                 final WebElement cookie = driver.findElement(By.xpath("//button[@class='btn btn-secondary btn-secondary-outline btn-md close-cookie-box']"));
                 cookie.click();
             } catch (Exception e) {
-                System.out.println("nie ma przycisku casteczek");
+                log.info("nie ma przycisku casteczek");
             }
             final WebElement placeToWrite = driver.findElement(By.xpath("//input[@name='search']"));
             placeToWrite.sendKeys(value);
@@ -182,7 +170,7 @@ public class ScrapperService {
                         names = products.findElements(By.xpath("//a[@class='productLink']"));
 
                         for (int i = 0; i < prices.size(); i++) {
-                            BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
+                            BigDecimal priceBD = BigDecimal.valueOf(Float.parseFloat(prices.get(i).getText()
                                     .substring(0, prices.get(i).getText().length() - 2)
                                     .replace(" ", "")
                                     .replace(",", ".")));
@@ -193,7 +181,6 @@ public class ScrapperService {
                         WebElement nextPage = driver.findElement(By.xpath("//li[@class='pagination-lg next']\n" +
                                 "//a[@class='pagination-btn']"));
                         nextPage.click();
-                        isLocationChange = false;
                         errorCounter =System.currentTimeMillis();
                     } catch (Exception e) {
                         loop = false;
@@ -201,7 +188,7 @@ public class ScrapperService {
                 }
             }
         } catch (Exception e) {
-            System.out.println("skończyły się strony Euro");
+            log.info("skończyły się strony Euro");
             driver.close();
         }
         driver.close();
@@ -213,8 +200,8 @@ public class ScrapperService {
 
 
         driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
-        URL = "https://www.euro.com.pl/";
-        driver.get(URL);
+        url = "https://www.euro.com.pl/";
+        driver.get(url);
         try {
             final WebElement placeToWrite = driver.findElement(By.xpath("//input[@id='keyword']"));
             placeToWrite.sendKeys(value);
@@ -248,13 +235,12 @@ public class ScrapperService {
                     try {
                         pageCounter++;
                         driver.get(driver.getCurrentUrl());
-                        //waitForLoad(driver);
                         WebElement products = driver.findElement(By.xpath("//div[@id='products']"));
                         prices = (products.findElements(By.xpath("//div[@class='price-normal selenium-price-normal']")));
                         names = (products.findElements(By.xpath("//a[@class='js-save-keyword']")));
                         //pętla dodająca dane do bazy dla konkretnej strony
                         for (int i = 1; i < names.size(); i += 2) {
-                            BigDecimal priceBD = new BigDecimal(Float.parseFloat(prices.get(i).getText()
+                            BigDecimal priceBD = BigDecimal.valueOf(Float.parseFloat(prices.get(i).getText()
                                     .substring(0, prices.get(i).getText().length() - 2)
                                     .replace(" ", "")
                                     .replace(",", ".")));
@@ -266,7 +252,7 @@ public class ScrapperService {
                         nextPage.click();
                         errorCounter =System.currentTimeMillis();
                     } catch (Exception e) {
-                        System.out.println("Skończyły się strony Euro");
+                        log.info("Skończyły się strony Euro");
                         loop = false;
                         driver.close();
                     }
