@@ -1,6 +1,5 @@
 package com.mongo.app.service;
 
-import com.mongo.app.AppApplication;
 import com.mongo.app.entity.Search;
 import com.mongo.app.repository.SearchRepository;
 import lombok.AllArgsConstructor;
