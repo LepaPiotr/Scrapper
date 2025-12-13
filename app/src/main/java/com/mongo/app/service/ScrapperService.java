@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -28,7 +31,7 @@ public class ScrapperService {
     public void shutdown() {
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(30, SECONDS)) {
                 executor.shutdownNow();
             }
         } catch (InterruptedException e) {

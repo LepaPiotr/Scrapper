@@ -4,6 +4,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.context.annotation.Configuration;
 
+
 import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +23,7 @@ public class SeleniumConfiguration {
         chromeOptions.addArguments("--proxy-server='direct://'");
         chromeOptions.addArguments("--start-maximized");
         chromeOptions.addArguments("--proxy-bypass-list=*");
+        chromeOptions.addArguments("--incognito");
         //   chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--disable-gpu");
         chromeOptions.addArguments("--disable-dev-shm-usage");

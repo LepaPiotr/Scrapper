@@ -5,46 +5,41 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @Component
 @AllArgsConstructor
 @Slf4j
 public class MoreleScrapper implements Scrapper {
+    private final ScrapperUtils scrapperUtils;
+
     @Override
     public void scrape(String value) {
-        ScrapperUtils.getToPage("https://www.morele.net/");
+        ChromeDriver driver = scrapperUtils.createDriver();
+        scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
 
-        ScrapperUtils.acceptCokies("//button[@class='btn btn-secondary btn-secondary-outline btn-md close-cookie-box']");
+        scrapperUtils.acceptCokies("//*[@id=\"onetrust-accept-btn-handler\"]", driver);
 
-        String searchBar = "//input[@name='search']']";
-        String search = "//button[@class='btn btn-primary h-quick-search-submit']";
-        ScrapperUtils.searchPhrase(searchBar, search, value);
-
-        int pageCounter = 1;
-        while (pageCounter <= 10) {
-            try {
-                pageCounter++;
-                WebElement products = ScrapperUtils.findElement("//div[@class='category-list']");
-                List<WebElement> prices = products.findElements(By.xpath("//div[@class='price-new']"));
-                List<WebElement> names = products.findElements(By.xpath("//a[@class='productLink']"));
-
-                for (int i = 0; i < prices.size(); i++) {
-                    BigDecimal priceBD = ScrapperUtils.getPrice(prices.get(i).getText());
-
-                    ScrapperUtils.addItem(names.get(i).getText(), "Morele", new Date(), priceBD.setScale(2, RoundingMode.HALF_UP),
-                            names.get(i).getAttribute("href"));
-                }
-                ScrapperUtils.getToPage("//li[@class='pagination-lg next']\n" +
-                        "//a[@class='pagination-btn']");
-            } catch (Exception e) {
-                break;
-            }
+        List<WebElement> elements = scrapperUtils.findElements("//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]", driver);
+        WebElement dog = elements.get(new Random().nextInt(17));
+        scrapperUtils.moveToElement(dog, driver);
+        dog.click();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        driver.close();
+
     }
 }
