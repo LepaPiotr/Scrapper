@@ -5,7 +5,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.context.annotation.Configuration;
 
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 @Configuration

@@ -24,7 +24,7 @@ public class ScrapperService {
                 executor.submit(() -> scrapper.scrape(message));
             }
         } catch (Exception e) {
-            log.error("Błąd podczas wykonywania scrapeAll: {}", e.getMessage(), e);
+            System.out.println("Błąd podczas wykonywania scrapeAll: {}");
         }
     }
 
@@ -37,7 +37,7 @@ public class ScrapperService {
         } catch (InterruptedException e) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
-            log.error("Wątki zostały przerwane: {}", e.getMessage(), e);
+            System.out.println("Wątki zostały przerwane: {}");
         }
     }
 }

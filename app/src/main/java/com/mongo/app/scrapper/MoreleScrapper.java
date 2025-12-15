@@ -2,6 +2,7 @@ package com.mongo.app.scrapper;
 
 import com.mongo.app.scrapper.utils.ScrapperUtils;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -17,48 +18,82 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
-public class MoreleScrapper implements Scrapper {
+public class MoreleScrapper {
+
     private final ScrapperUtils scrapperUtils;
 
-    @Override
-    public void scrape(String value) {
-        IntStream.range(0, Runtime.getRuntime().availableProcessors())
-                .parallel()
-                .forEach(i -> {
+    public void scrape() {
 
-                    ChromeDriver driver = null;
+        int driversCount = Runtime.getRuntime().availableProcessors() > 5 ? Runtime.getRuntime().availableProcessors() * 2 : Runtime.getRuntime().availableProcessors();
 
-                    try {
-                        driver = scrapperUtils.createDriver();
-                        scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
+        Semaphore chromeLimit = new Semaphore(driversCount);
+        CountDownLatch pageLoadedBarrier = new CountDownLatch(driversCount);
 
-                        scrapperUtils.acceptCokies("//*[@id=\"onetrust-accept-btn-handler\"]", driver);
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
-                        List<WebElement> elements =
-                                scrapperUtils.findElements("//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]", driver);
+            IntStream.range(0, driversCount)
+                    .forEach(i -> executor.submit(() -> {
 
-                        WebElement dog = elements.get(new Random().nextInt(elements.size()));
-                        scrapperUtils.moveToElement(dog, driver);
-                        dog.click();
+                        ChromeDriver driver = null;
 
-                        Thread.sleep(500);
+                        try {
+                            chromeLimit.acquire();
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                            driver = scrapperUtils.createDriver();
 
-                    } finally {
-                        if (driver != null) {
-                            try {
-                                driver.quit();
-                            } catch (Exception ignored) {}
+                            // 1️⃣ KAŻDY DRIVER ŁADUJE STRONĘ
+                            scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
+
+                            // 2️⃣ SYGNAŁ: TEN DRIVER JEST GOTOWY
+                            pageLoadedBarrier.countDown();
+
+                            // 3️⃣ CZEKAJ, AŻ WSZYSCY BĘDĄ GOTOWI
+                            pageLoadedBarrier.await();
+
+                            // ⬇⬇⬇ DOPIERO TERAZ IDZIEMY DALEJ ⬇⬇⬇
+                            scrapperUtils.acceptCokies(
+                                    "//*[@id=\"onetrust-accept-btn-handler\"]",
+                                    driver
+                            );
+
+                            List<WebElement> elements =
+                                    scrapperUtils.findElements(
+                                            "//*[@id=\"pet-dyzio\"]/div/div[4]/div[2]/div[1]",
+                                            driver
+                                    );
+
+                            WebElement dog = elements.get(new Random().nextInt(elements.size()));
+                            scrapperUtils.moveToElement(dog, driver);
+                            dog.click();
+
+                            Thread.sleep(500);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        } finally {
+                            if (driver != null) {
+                                try {
+                                    driver.quit();
+                                } catch (Exception ignored) {}
+                            }
+                            chromeLimit.release();
                         }
-                    }
-                });
+                    }));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 }

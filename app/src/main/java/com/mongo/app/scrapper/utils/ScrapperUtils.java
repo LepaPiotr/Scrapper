@@ -48,7 +48,7 @@ public class ScrapperUtils {
             final WebElement cookie = findElement(target, chromeDriver);
             cookie.click();
         } catch (Exception e){
-            log.info("Brak przycisku");
+            System.out.println("Brak przycisku");
         }
     }
 }
