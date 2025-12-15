@@ -48,19 +48,10 @@ public class MoreleScrapper {
 
                         try {
                             chromeLimit.acquire();
-
                             driver = scrapperUtils.createDriver();
-
-                            // 1️⃣ KAŻDY DRIVER ŁADUJE STRONĘ
                             scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
-
-                            // 2️⃣ SYGNAŁ: TEN DRIVER JEST GOTOWY
                             pageLoadedBarrier.countDown();
-
-                            // 3️⃣ CZEKAJ, AŻ WSZYSCY BĘDĄ GOTOWI
                             pageLoadedBarrier.await();
-
-                            // ⬇⬇⬇ DOPIERO TERAZ IDZIEMY DALEJ ⬇⬇⬇
                             scrapperUtils.acceptCokies(
                                     "//*[@id=\"onetrust-accept-btn-handler\"]",
                                     driver
