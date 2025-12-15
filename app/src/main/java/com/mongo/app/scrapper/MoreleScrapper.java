@@ -18,10 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,9 +31,10 @@ public class MoreleScrapper {
 
     public void scrape() {
 
-        int driversCount = Runtime.getRuntime().availableProcessors() > 5 ? Runtime.getRuntime().availableProcessors() * 2 : Runtime.getRuntime().availableProcessors();
+        int driversCount = Runtime.getRuntime().availableProcessors() > 5
+                ? Runtime.getRuntime().availableProcessors() * 2
+                : Runtime.getRuntime().availableProcessors();
 
-        Semaphore chromeLimit = new Semaphore(driversCount);
         CountDownLatch pageLoadedBarrier = new CountDownLatch(driversCount);
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -45,13 +43,28 @@ public class MoreleScrapper {
                     .forEach(i -> executor.submit(() -> {
 
                         ChromeDriver driver = null;
+                        boolean pageLoaded = false;
 
                         try {
-                            chromeLimit.acquire();
-                            driver = scrapperUtils.createDriver();
-                            scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
-                            pageLoadedBarrier.countDown();
-                            pageLoadedBarrier.await();
+                            try {
+                                driver = scrapperUtils.createDriver();
+                                scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
+                                pageLoaded = true; // driver i strona załadowane
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                // nawet jeśli driver się nie utworzy, odliczamy barrier
+                                pageLoadedBarrier.countDown();
+                            }
+
+                            // czekaj maksymalnie 30 sekund, żeby nie wisieć w nieskończoność
+                            pageLoadedBarrier.await(20, TimeUnit.SECONDS);
+
+                            if (!pageLoaded || driver == null) {
+                                return; // nic więcej nie rób, driver nie powstał
+                            }
+
+                            // reszta logiki
                             scrapperUtils.acceptCokies(
                                     "//*[@id=\"onetrust-accept-btn-handler\"]",
                                     driver
@@ -59,7 +72,7 @@ public class MoreleScrapper {
 
                             List<WebElement> elements =
                                     scrapperUtils.findElements(
-                                            "//*[@id=\"pet-dyzio\"]/div/div[4]/div[2]/div[1]",
+                                            "//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]",
                                             driver
                                     );
 
@@ -71,14 +84,12 @@ public class MoreleScrapper {
 
                         } catch (Exception e) {
                             e.printStackTrace();
-
                         } finally {
                             if (driver != null) {
                                 try {
                                     driver.quit();
                                 } catch (Exception ignored) {}
                             }
-                            chromeLimit.release();
                         }
                     }));
 
@@ -86,5 +97,6 @@ public class MoreleScrapper {
             e.printStackTrace();
         }
     }
+
 
 }
