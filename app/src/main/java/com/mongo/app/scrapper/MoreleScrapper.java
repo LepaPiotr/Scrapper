@@ -57,16 +57,19 @@ public class MoreleScrapper {
                             } finally {
                                 pageLoadedBarrier.countDown();
                             }
-                            pageLoadedBarrier.await(20, TimeUnit.SECONDS);
-
-                            if (!pageLoaded || driver == null) {
-                                return;
-                            }
 
                             scrapperUtils.acceptCokies(
                                     "//*[@id=\"onetrust-accept-btn-handler\"]",
                                     driver
                             );
+
+                            changePage(driver);
+
+                            pageLoadedBarrier.await(20, TimeUnit.SECONDS);
+
+                            if (!pageLoaded || driver == null) {
+                                return;
+                            }
 
                             List<WebElement> elements =
                                     scrapperUtils.findElements(
@@ -96,6 +99,25 @@ public class MoreleScrapper {
         }
 
         return successCount.get();
+    }
+
+    private void changePage (ChromeDriver driver){
+        int rand = new Random().nextInt(4);
+        if(rand == 3) return;
+
+        List<WebElement> pages = new ArrayList<>();
+        pages.add(scrapperUtils.findElement(
+                "//*[@id=\"block_d8de5bfc062d248349f40f274e06ef68\"]/div/div/div[3]/div/div[2]",
+                driver));
+
+        pages.add(scrapperUtils.findElement(
+                "//*[@id=\"block_d8de5bfc062d248349f40f274e06ef68\"]/div/div/div[3]/div/div[3]",
+                driver));
+        pages.add(scrapperUtils.findElement(
+                "//*[@id=\"block_d8de5bfc062d248349f40f274e06ef68\"]/div/div/div[3]/div/div[4]",
+                driver));
+
+        pages.get(rand).click();
     }
 
 
