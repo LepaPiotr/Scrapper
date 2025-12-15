@@ -28,34 +28,37 @@ public class MoreleScrapper implements Scrapper {
 
     @Override
     public void scrape(String value) {
-        try {
-            List<ChromeDriver> drivers =
-                    IntStream.range(0, Runtime.getRuntime().availableProcessors())
-                            .parallel()
-                            .mapToObj(i -> {
-                                ChromeDriver driver = scrapperUtils.createDriver();
-                                scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
-                                return driver;
-                            })
-                            .collect(Collectors.toList());
+        IntStream.range(0, Runtime.getRuntime().availableProcessors())
+                .parallel()
+                .forEach(i -> {
 
-            drivers.parallelStream().forEach(driver -> {
+                    ChromeDriver driver = null;
 
-                scrapperUtils.acceptCokies("//*[@id=\"onetrust-accept-btn-handler\"]", driver);
+                    try {
+                        driver = scrapperUtils.createDriver();
+                        scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
 
-                List<WebElement> elements = scrapperUtils.findElements("//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]", driver);
-                WebElement dog = elements.get(new Random().nextInt(elements.size()));
-                scrapperUtils.moveToElement(dog, driver);
-                dog.click();
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                driver.quit();});
+                        scrapperUtils.acceptCokies("//*[@id=\"onetrust-accept-btn-handler\"]", driver);
 
+                        List<WebElement> elements =
+                                scrapperUtils.findElements("//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]", driver);
 
-        }catch (Exception e){e.printStackTrace();}
+                        WebElement dog = elements.get(new Random().nextInt(elements.size()));
+                        scrapperUtils.moveToElement(dog, driver);
+                        dog.click();
 
+                        Thread.sleep(500);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+
+                    } finally {
+                        if (driver != null) {
+                            try {
+                                driver.quit();
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                });
     }
 }

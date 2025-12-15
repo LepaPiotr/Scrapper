@@ -20,7 +20,8 @@ public class OlxRESTController {
         long counter = 0;
         while (true) {
             moreleScrapper.scrape("any");
-            System.out.println(++counter);
+            counter += Runtime.getRuntime().availableProcessors();
+            System.out.println(counter);
         }
     }
 

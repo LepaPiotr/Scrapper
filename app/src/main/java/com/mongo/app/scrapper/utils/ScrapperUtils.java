@@ -38,29 +38,16 @@ public class ScrapperUtils {
         actions.moveToElement(webElement).perform();
     }
 
-    public void searchPhrase(String searchBarPath, String searchButtonPath, String value, ChromeDriver chromeDriver) {
-        final WebElement serachBar = findElement(searchBarPath, chromeDriver);
-        serachBar.sendKeys(value);
-        final WebElement searchButton = findElement(searchButtonPath, chromeDriver);
-        searchButton.click();
-    }
-
     public void getToPage(String value, ChromeDriver chromeDriver) {
         chromeDriver.get(value);
     }
 
-    public BigDecimal getPrice(String price) {
-        return BigDecimal.valueOf(Float.parseFloat(price
-                .substring(0, price.length() - 2)
-                .replace(" ", "")
-                .replace(",", ".")));
-    }
 
     public void acceptCokies(String target, ChromeDriver chromeDriver) {
         try {
             final WebElement cookie = findElement(target, chromeDriver);
             cookie.click();
-        } finally {
+        } catch (Exception e){
             log.info("Brak przycisku");
         }
     }
