@@ -16,6 +16,7 @@ public class SeleniumConfiguration {
         System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
     }
 
+
     public ChromeDriver driver() {
         final ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--window-size=1920,1080");
@@ -24,7 +25,7 @@ public class SeleniumConfiguration {
         chromeOptions.addArguments("--start-maximized");
         chromeOptions.addArguments("--proxy-bypass-list=*");
         chromeOptions.addArguments("--incognito");
-        //   chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--disable-gpu");
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--no-sandbox");

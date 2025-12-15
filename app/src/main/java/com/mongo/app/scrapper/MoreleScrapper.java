@@ -13,9 +13,12 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 @AllArgsConstructor
@@ -25,21 +28,34 @@ public class MoreleScrapper implements Scrapper {
 
     @Override
     public void scrape(String value) {
-        ChromeDriver driver = scrapperUtils.createDriver();
-        scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
-
-        scrapperUtils.acceptCokies("//*[@id=\"onetrust-accept-btn-handler\"]", driver);
-
-        List<WebElement> elements = scrapperUtils.findElements("//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]", driver);
-        WebElement dog = elements.get(new Random().nextInt(17));
-        scrapperUtils.moveToElement(dog, driver);
-        dog.click();
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        driver.close();
+            List<ChromeDriver> drivers =
+                    IntStream.range(0, Runtime.getRuntime().availableProcessors())
+                            .parallel()
+                            .mapToObj(i -> {
+                                ChromeDriver driver = scrapperUtils.createDriver();
+                                scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
+                                return driver;
+                            })
+                            .collect(Collectors.toList());
+
+            drivers.parallelStream().forEach(driver -> {
+
+                scrapperUtils.acceptCokies("//*[@id=\"onetrust-accept-btn-handler\"]", driver);
+
+                List<WebElement> elements = scrapperUtils.findElements("//*[@class=\"single-pet\"]/div/div[4]/div[2]/div[1]", driver);
+                WebElement dog = elements.get(new Random().nextInt(elements.size()));
+                scrapperUtils.moveToElement(dog, driver);
+                dog.click();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                driver.quit();});
+
+
+        }catch (Exception e){e.printStackTrace();}
 
     }
 }

@@ -1,6 +1,5 @@
 package com.mongo.app.controller;
 
-import com.mongo.app.entity.Product;
 import com.mongo.app.scrapper.MoreleScrapper;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
