@@ -19,8 +19,7 @@ public class OlxRESTController {
     public void findAll() {
         long counter = 0;
         while (true) {
-            moreleScrapper.scrape();
-            counter += Runtime.getRuntime().availableProcessors() > 5 ? Runtime.getRuntime().availableProcessors() * 2 : Runtime.getRuntime().availableProcessors();
+            counter += moreleScrapper.scrape();
             System.out.println(counter);
         }
     }

@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -29,13 +30,14 @@ public class MoreleScrapper {
 
     private final ScrapperUtils scrapperUtils;
 
-    public void scrape() {
+    public int scrape() {
 
         int driversCount = Runtime.getRuntime().availableProcessors() > 5
                 ? Runtime.getRuntime().availableProcessors() * 2
                 : Runtime.getRuntime().availableProcessors();
 
         CountDownLatch pageLoadedBarrier = new CountDownLatch(driversCount);
+        AtomicInteger successCount = new AtomicInteger(0);
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
@@ -49,22 +51,18 @@ public class MoreleScrapper {
                             try {
                                 driver = scrapperUtils.createDriver();
                                 scrapperUtils.getToPage("https://nakarmpsa.olx.pl", driver);
-                                pageLoaded = true; // driver i strona załadowane
+                                pageLoaded = true;
                             } catch (Exception e) {
                                 e.printStackTrace();
                             } finally {
-                                // nawet jeśli driver się nie utworzy, odliczamy barrier
                                 pageLoadedBarrier.countDown();
                             }
-
-                            // czekaj maksymalnie 30 sekund, żeby nie wisieć w nieskończoność
                             pageLoadedBarrier.await(20, TimeUnit.SECONDS);
 
                             if (!pageLoaded || driver == null) {
-                                return; // nic więcej nie rób, driver nie powstał
+                                return;
                             }
 
-                            // reszta logiki
                             scrapperUtils.acceptCokies(
                                     "//*[@id=\"onetrust-accept-btn-handler\"]",
                                     driver
@@ -81,6 +79,7 @@ public class MoreleScrapper {
                             dog.click();
 
                             Thread.sleep(500);
+                            successCount.incrementAndGet();
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -92,10 +91,11 @@ public class MoreleScrapper {
                             }
                         }
                     }));
-
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return successCount.get();
     }
 
 
