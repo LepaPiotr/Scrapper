@@ -9,7 +9,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -43,12 +42,11 @@ public class ScrapperUtils {
     }
 
 
-    public void acceptCokies(String target, ChromeDriver chromeDriver) {
+    public void findButton(String target, ChromeDriver chromeDriver) {
         try {
-            final WebElement cookie = findElement(target, chromeDriver);
-            cookie.click();
+             findElement(target, chromeDriver).click();
         } catch (Exception e){
-            System.out.println("Brak przycisku");
+            log.info("can't find or click the button");
         }
     }
 }
