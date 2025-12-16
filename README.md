@@ -1,0 +1,3 @@
+Master branch contains backend application created for an engineering thesis.
+It screape 3 big shops and save prices for requested items, then save them in mongoDB database and schedule next request in other days for the same items in order to monitoring changing of price for given item.
+Branch Olx contains appliction with is used for action "nakarm psa" (eng. feed the dog) organized by Olx. It clicks on the random dogs due to lack of security on site it is posibble to do that multiple times in incognito mode. i Was single handed responsible for over 200 000 klicks in the page witch is equvalend of more than 60KG dog food given to charity.
