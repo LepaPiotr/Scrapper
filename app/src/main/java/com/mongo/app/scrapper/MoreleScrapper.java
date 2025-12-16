@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,19 +19,20 @@ import java.util.List;
 public class MoreleScrapper implements Scrapper {
     @Override
     public void scrape(String value) {
-        ScrapperUtils.getToPage("https://www.morele.net/");
+        ChromeDriver driver = ScrapperUtils.createDriver();
+        ScrapperUtils.getToPage("https://www.morele.net/", driver);
 
-        ScrapperUtils.acceptCokies("//button[@class='btn btn-secondary btn-secondary-outline btn-md close-cookie-box']");
+        ScrapperUtils.acceptCokies("//button[@class='btn btn-secondary btn-secondary-outline btn-md close-cookie-box']", driver);
 
         String searchBar = "//input[@name='search']']";
         String search = "//button[@class='btn btn-primary h-quick-search-submit']";
-        ScrapperUtils.searchPhrase(searchBar, search, value);
+        ScrapperUtils.searchPhrase(searchBar, search, value, driver);
 
         int pageCounter = 1;
         while (pageCounter <= 10) {
             try {
                 pageCounter++;
-                WebElement products = ScrapperUtils.findElement("//div[@class='category-list']");
+                WebElement products = ScrapperUtils.findElement("//div[@class='category-list']", driver);
                 List<WebElement> prices = products.findElements(By.xpath("//div[@class='price-new']"));
                 List<WebElement> names = products.findElements(By.xpath("//a[@class='productLink']"));
 
@@ -41,10 +43,11 @@ public class MoreleScrapper implements Scrapper {
                             names.get(i).getAttribute("href"));
                 }
                 ScrapperUtils.getToPage("//li[@class='pagination-lg next']\n" +
-                        "//a[@class='pagination-btn']");
+                        "//a[@class='pagination-btn']", driver);
             } catch (Exception e) {
                 break;
             }
         }
+        driver.quit();
     }
 }
