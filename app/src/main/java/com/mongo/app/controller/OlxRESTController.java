@@ -1,6 +1,6 @@
 package com.mongo.app.controller;
 
-import com.mongo.app.scrapper.MoreleScrapper;
+import com.mongo.app.scrapper.OlxScrapper;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class OlxRESTController {
 
-    MoreleScrapper moreleScrapper;
+    OlxScrapper olxScrapper;
 
     @GetMapping()
     public void feedDogs() {
-        moreleScrapper.feedDogs();
+        olxScrapper.feedDogs();
     }
 
 }

@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class MoreleScrapper {
+public class OlxScrapper {
 
     private final ScrapperUtils scrapperUtils;
 
